@@ -2,11 +2,62 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Document</title>
+    <title>Weather App</title>
   </head>
   <body>
-    <script src="script.js"></script>
+    <h1>Weather Dashboard</h1>
+
+    <!-- Search Section -->
+    <div>
+      <input type="text" placeholder="Enter a City Name" />
+      <button>Search</button>
+
+      <p>Or</p>
+      <button>Use Current Location</button>
+    </div>
+
+    <!-- Current Weather -->
+    <div>
+      <h2>City Name, Country (Date)</h2>
+      <p>Temperature: 25°C</p>
+      <p>Wind Speed: 15 km/h</p>
+      <p>Humidity: 60%</p>
+      <img src="" alt="Weather Icon" width="80" height="80" />
+      <p>Clear sky</p>
+    </div>
+
+    <!-- 5-Day Forecast -->
+    <h2>5-Day Forecast</h2>
+    <div>
+      <div>
+        <h3>Date 1</h3>
+        <img src="" alt="Icon" width="50" height="50" />
+        <p>Temp: 28°C</p>
+        <p>Wind: 10 km/h</p>
+        <p>Humidity: 55%</p>
+      </div>
+
+      <div>
+        <h3>Date 2</h3>
+        <img src="" alt="Icon" width="50" height="50" />
+        <p>Temp: 30°C</p>
+        <p>Wind: 12 km/h</p>
+        <p>Humidity: 50%</p>
+      </div>
+
+      <!-- More cards if needed -->
+    </div>
+
+    <!-- Error Message -->
+    <div>
+      <p>Error message here</p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Developed by Vishwas Khitolia</p>
+      <p>Email: vishwaskhitolia@gmail.com</p>
+      <p>&copy; 2025 Weather App. All rights reserved.</p>
+    </footer>
   </body>
 </html>

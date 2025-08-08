@@ -1,49 +1,68 @@
+// Wait for the DOM to be fully loaded before executing the script
 document.addEventListener("DOMContentLoaded", function () {
-  const cityInput = document.getElementById("city");
-  const searchBtn = document.getElementById("submit");
-  const currentLocationBtn = document.getElementById("currentLocationBtn");
-  const recentCitiesDropdown = document.getElementById("recentCitiesDropdown");
-  const weatherInfo = document.getElementById("weather-info");
-  const forecastContainer = document.getElementById("forecast");
-  const errorContainer = document.getElementById("error");
-  const errorMessage = document.getElementById("errorMessage");
-  const cityOutput = document.getElementById("cityoutput");
-  const description = document.getElementById("description");
-  const temp = document.getElementById("temp");
-  const wind = document.getElementById("wind");
-  const humidity = document.getElementById("humidity");
-  const weatherIcon = document.getElementById("weather-icon");
+  // Get all DOM elements needed for the application
+  const cityInput = document.getElementById("city"); // City search input field
+  const searchBtn = document.getElementById("submit"); // Search button
+  const currentLocationBtn = document.getElementById("currentLocationBtn"); // Current location button
+  const recentCitiesDropdown = document.getElementById("recentCitiesDropdown"); // Dropdown for recent cities
+  const weatherInfo = document.getElementById("weather-info"); // Container for current weather info
+  const forecastContainer = document.getElementById("forecast"); // Container for forecast cards
+  const errorContainer = document.getElementById("error"); // Error message container
+  const errorMessage = document.getElementById("errorMessage"); // Error message text
+  const cityOutput = document.getElementById("cityoutput"); // City name display
+  const description = document.getElementById("description"); // Weather description
+  const temp = document.getElementById("temp"); // Temperature display
+  const wind = document.getElementById("wind"); // Wind speed display
+  const humidity = document.getElementById("humidity"); // Humidity display
+  const weatherIcon = document.getElementById("weather-icon"); // Weather icon image
 
-  const apiKey = "fcb1b1f3e6bec7a36ee1f44fd9eea71d";
-  const baseUrl = "https://api.openweathermap.org/data/2.5";
-  const iconUrl = "https://openweathermap.org/img/wn/";
+  // API configuration
+  const apiKey = "fcb1b1f3e6bec7a36ee1f44fd9eea71d"; // OpenWeatherMap API key
+  const baseUrl = "https://api.openweathermap.org/data/2.5"; // Base API URL
+  const iconUrl = "https://openweathermap.org/img/wn/"; // Base URL for weather icons
 
+  // Get recent cities from localStorage or initialize empty array
   let recentCities = JSON.parse(localStorage.getItem("recentCities")) || [];
 
+  /**
+   * Convert temperature from Kelvin to Celsius
+   * @param {number} kelvin - Temperature in Kelvin
+   * @returns {string} - Temperature in Celsius with 1 decimal place
+   */
   function kelvinToCelsius(kelvin) {
     return (kelvin - 273.15).toFixed(1);
   }
 
+  /**
+   * Display current weather data in the UI
+   * @param {Object} data - Weather data from API
+   */
   function displayCurrentWeather(data) {
-    const date = new Date(data.dt * 1000);
+    const date = new Date(data.dt * 1000); // Convert timestamp to Date object
     cityOutput.textContent = `${data.name}, ${data.sys.country} (${formatDate(
       date
     )})`;
     temp.textContent = `${kelvinToCelsius(data.main.temp)}°C`;
-    wind.textContent = `${(data.wind.speed * 3.6).toFixed(1)} km/h`;
+    wind.textContent = `${(data.wind.speed * 3.6).toFixed(1)} km/h`; // Convert m/s to km/h
     humidity.textContent = `${data.main.humidity}%`;
     description.textContent = data.weather[0].description;
     weatherIcon.src = `${iconUrl}${data.weather[0].icon}@2x.png`;
     weatherIcon.alt = data.weather[0].description;
-    weatherInfo.classList.remove("hidden");
-    hideError();
-    updateRecentCities(data.name);
+    weatherInfo.classList.remove("hidden"); // Show weather info section
+    hideError(); // Hide any previous errors
+    updateRecentCities(data.name); // Update recent cities list
   }
 
+  /**
+   * Display 5-day forecast data in the UI
+   * @param {Object} data - Forecast data from API
+   */
   function displayForecast(data) {
-    forecastContainer.innerHTML = "";
-    const dailyForecasts = [];
-    const seenDays = new Set();
+    forecastContainer.innerHTML = ""; // Clear previous forecast
+    const dailyForecasts = []; // Array to store one forecast per day
+    const seenDays = new Set(); // Track days we've already processed
+
+    // Filter to get one forecast per day (around noon time)
     data.list.forEach((item) => {
       const date = new Date(item.dt * 1000);
       const dateString = formatDate(date);
@@ -56,31 +75,37 @@ document.addEventListener("DOMContentLoaded", function () {
         dailyForecasts.push(item);
       }
     });
+
+    // Create forecast cards for the next 5 days
     dailyForecasts.slice(0, 5).forEach((day) => {
       const date = new Date(day.dt * 1000);
       const card = document.createElement("div");
       card.className = "bg-white rounded-xl shadow-lg p-4 weather-card";
       card.innerHTML = `
-              <h3 class="font-semibold text-gray-800 mb-2">${formatDate(
-                date
-              )}</h3>
-              <img src="${iconUrl}${day.weather[0].icon}.png" alt="${
+        <h3 class="font-semibold text-gray-800 mb-2">${formatDate(date)}</h3>
+        <img src="${iconUrl}${day.weather[0].icon}.png" alt="${
         day.weather[0].description
-      }" class="mx-auto w-12 h-12 mb-2">
-              <p class="text-gray-600">Temp: <span class="font-bold text-gray-800">${kelvinToCelsius(
-                day.main.temp
-              )}°C</span></p>
-              <p class="text-gray-600">Wind: <span class="font-bold text-gray-800">${(
-                day.wind.speed * 3.6
-              ).toFixed(1)} km/h</span></p>
-              <p class="text-gray-600">Humidity: <span class="font-bold text-gray-800">${
-                day.main.humidity
-              }%</span></p>
-            `;
+      }" 
+             class="mx-auto w-12 h-12 mb-2">
+        <p class="text-gray-600">Temp: <span class="font-bold text-gray-800">${kelvinToCelsius(
+          day.main.temp
+        )}°C</span></p>
+        <p class="text-gray-600">Wind: <span class="font-bold text-gray-800">${(
+          day.wind.speed * 3.6
+        ).toFixed(1)} km/h</span></p>
+        <p class="text-gray-600">Humidity: <span class="font-bold text-gray-800">${
+          day.main.humidity
+        }%</span></p>
+      `;
       forecastContainer.appendChild(card);
     });
   }
 
+  /**
+   * Format date to readable string (e.g., "Jan 1, 2023")
+   * @param {Date} date - Date object to format
+   * @returns {string} - Formatted date string
+   */
   function formatDate(date) {
     return date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -89,19 +114,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  /**
+   * Update recent cities list in localStorage
+   * @param {string} city - City name to add to recent list
+   */
   function updateRecentCities(city) {
-    if (!city || recentCities.includes(city)) return;
-    recentCities.unshift(city);
-    if (recentCities.length > 5) recentCities.pop();
-    localStorage.setItem("recentCities", JSON.stringify(recentCities));
+    if (!city || recentCities.includes(city)) return; // Skip if city is empty or already exists
+    recentCities.unshift(city); // Add to beginning of array
+    if (recentCities.length > 5) recentCities.pop(); // Keep only 5 most recent
+    localStorage.setItem("recentCities", JSON.stringify(recentCities)); // Save to localStorage
   }
 
+  /**
+   * Populate recent cities dropdown menu
+   */
   function populateRecentCitiesDropdown() {
-    recentCitiesDropdown.innerHTML = "";
+    recentCitiesDropdown.innerHTML = ""; // Clear previous items
     recentCities.forEach((city) => {
       const cityElement = document.createElement("div");
       cityElement.className = "p-3 hover:bg-blue-50 cursor-pointer";
       cityElement.textContent = city;
+      // When a city is clicked from dropdown
       cityElement.addEventListener("click", () => {
         cityInput.value = city;
         fetchWeatherData(city);
@@ -111,6 +144,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  /**
+   * Show/hide loading state
+   * @param {boolean} show - Whether to show loading state
+   */
   function showLoading(show) {
     if (show) {
       searchBtn.innerHTML =
@@ -128,18 +165,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  /**
+   * Show error message
+   * @param {string} message - Error message to display
+   */
   function showError(message) {
     errorMessage.textContent = message;
     errorContainer.classList.remove("hidden");
   }
 
+  /**
+   * Hide error message
+   */
   function hideError() {
     errorContainer.classList.add("hidden");
   }
 
+  /**
+   * Fetch weather data from API
+   * @param {string} city - City name to fetch weather for
+   */
   async function fetchWeatherData(city) {
     showLoading(true);
     try {
+      // Fetch current weather
       const currentResponse = await fetch(
         `${baseUrl}/weather?q=${encodeURIComponent(city)}&appid=${apiKey}`
       );
@@ -152,6 +201,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       const currentData = await currentResponse.json();
       displayCurrentWeather(currentData);
+
+      // Fetch forecast after current weather succeeds
       const forecastResponse = await fetch(
         `${baseUrl}/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}`
       );
@@ -167,9 +218,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Event Listeners
+
+  // Search button click handler
   searchBtn.addEventListener("click", function (event) {
     event.preventDefault();
     const city = cityInput.value.trim();
+    // Validate input (only letters, spaces and commas allowed)
     if (!city || !/^[a-zA-Z\s,]+$/.test(city)) {
       showError("Please enter a valid city name (letters and spaces only)");
       return;
@@ -177,12 +232,14 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchWeatherData(city);
   });
 
+  // Handle Enter key in search input
   cityInput.addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
       searchBtn.click();
     }
   });
 
+  // Show recent cities dropdown when input is focused
   cityInput.addEventListener("focus", () => {
     if (recentCities.length > 0) {
       populateRecentCitiesDropdown();
@@ -190,6 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Hide dropdown when clicking outside
   document.addEventListener("click", (e) => {
     if (
       !cityInput.contains(e.target) &&
@@ -199,18 +257,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Current location button handler
   currentLocationBtn.addEventListener("click", function () {
     if (navigator.geolocation) {
       showLoading(true);
+      // Get user's current position
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
             const { latitude, longitude } = position.coords;
+            // Fetch weather for current coordinates
             const response = await fetch(
               `${baseUrl}/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}`
             );
             const data = await response.json();
             displayCurrentWeather(data);
+            // Fetch forecast for current coordinates
             const forecastResponse = await fetch(
               `${baseUrl}/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}`
             );

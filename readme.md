@@ -27,7 +27,7 @@ Weather-Forecast/
 ├── index.html # Contains HTML structure with embedded UI
 ├── style.css # Custom styles and layout tweaks
 ├── script.js # Core JavaScript logic (API calls, UI updates, interactions)
-└── README.md # This documentation
+└── README.md # This Documentation
 
 Technologies Used
 
